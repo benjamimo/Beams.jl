@@ -93,6 +93,16 @@ function BesselGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::F
     return BG
 end
 
+"""
+    CosineGaussBeam(x, y, w0, phi, a, l)
+
+Cosine-Gaussian beam """
+function CosineGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, th::Float64)
+    CG::ComplexF64 = 0.0 + im*0.0
+    rr2 = (x^2 + y^2)/(w0^2)
+    CG = exp(-rr2) * cos(a*(x*cos(th) + y*sin(th))/w0)
+    return CG
+end
 
 
 end # module

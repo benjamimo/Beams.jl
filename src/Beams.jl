@@ -3,7 +3,7 @@ module Beams
 include("SpecFunctions.jl")    # Some Special functions
 using SpecialFunctions
 
-export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam
+export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam
 
 """
     LaguerreGaussBeam(x, y, w0, phi, l, p)
@@ -102,6 +102,17 @@ function CosineGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::F
     rr2 = (x^2 + y^2)/(w0^2)
     CG = exp(-rr2) * cos(a*(x*cos(th) + y*sin(th))/w0)
     return CG
+end
+
+"""
+    SineGaussBeam(x, y, w0, phi, a, l)
+
+Sine-Gaussian beam """
+function SineGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, th::Float64)
+    SG::ComplexF64 = 0.0 + im*0.0
+    rr2 = (x^2 + y^2)/(w0^2)
+    SG = exp(-rr2) * sin(a*(x*cos(th) + y*sin(th))/w0)
+    return SG
 end
 
 

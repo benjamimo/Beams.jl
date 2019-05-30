@@ -1,7 +1,7 @@
 module Beams
 
 include("SpecFunctions.jl")    # Some Special functions
-using SpecialFunctions
+#using SpecialFunctions
 
 export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam
 

@@ -1,9 +1,10 @@
 module Beams
 
 include("SpecFunctions.jl")    # Some Special functions
-using SpecialFunctions  # Needed for Bessel!
+using SpecialFunctions   # needed for Bessel!
+using GSL  # Mathieu functions!!
 
-export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam
+export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam, MathieuGaussBeamE, MathieuGaussBeamO
 
 """
     LaguerreGaussBeam(x, y, w0, phi, l, p)
@@ -115,5 +116,37 @@ function SineGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Flo
     return SG
 end
 
+"""
+    MathieuGaussBeamE(x, y, w0, phi, m, q, a)
+
+Mathieu-Gaussian beam (even)"""
+function MathieuGaussBeamE(x::Float64, y::Float64, w0::Float64, phi::Float64, m::Int64, q::Float64, a::Float64)
+    MGE::ComplexF64 = 0.0 + im*0.0
+    f0 = 2*sqrt(q) / a
+    rr2 = (x^2 + y^2)/(w0^2)
+    uu = acosh((x+im*y)/f0)
+    ee = real(uu)
+    nn = imag(uu)
+    nn = nn + (nn<0)*2*pi
+    MGE = exp(-rr2) * sf_mathieu_Mc(1,m,q,ee) * sf_mathieu_ce(m,q,nn) * exp(im*phi)
+#     MGE = exp(-rr2) * JeMathieu(m,q,Coef,ee) * ceMathieu(m,q,Coef,ee) * exp(im*phi) # mi funcion no jalo :(
+    return MGE
+end
+
+"""
+    MathieuGaussBeamO(x, y, w0, phi, m, q, a)
+
+Mathieu-Gaussian beam (odd)"""
+function MathieuGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, m::Int64, q::Float64, a::Float64)
+    MGO::ComplexF64 = 0.0 + im*0.0
+    f0 = 2*sqrt(q) / a
+    rr2 = (x^2 + y^2)/(w0^2)
+    uu = acosh((x+im*y)/f0)
+    ee = real(uu)
+    nn = imag(uu)
+    nn = nn + (nn<0)*2*pi
+    MGO = exp(-rr2) * sf_mathieu_Ms(1,m,q,ee) * sf_mathieu_se(m,q,nn) * exp(im*phi)
+    return MGO
+end
 
 end # module

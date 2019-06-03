@@ -122,7 +122,7 @@ end
 Mathieu-Gaussian beam (even)"""
 function MathieuGaussBeamE(x::Float64, y::Float64, w0::Float64, phi::Float64, m::Int64, q::Float64, a::Float64)
     MGE::ComplexF64 = 0.0 + im*0.0
-    f0 = 2*sqrt(q) / a
+    f0 = sqrt(q/2) * w0 / a
     rr2 = (x^2 + y^2)/(w0^2)
     uu = acosh((x+im*y)/f0)
     ee = real(uu)
@@ -139,7 +139,7 @@ end
 Mathieu-Gaussian beam (odd)"""
 function MathieuGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, m::Int64, q::Float64, a::Float64)
     MGO::ComplexF64 = 0.0 + im*0.0
-    f0 = 2*sqrt(q) / a
+    f0 = sqrt(q/2) * w0 / a
     rr2 = (x^2 + y^2)/(w0^2)
     uu = acosh((x+im*y)/f0)
     ee = real(uu)

@@ -4,7 +4,7 @@ include("SpecFunctions.jl")    # Some Special functions
 using SpecialFunctions   # needed for Bessel!
 using GSL  # Mathieu functions!!
 
-export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam, MathieuGaussBeamE, MathieuGaussBeamO
+export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam, MathieuGaussBeamE, MathieuGaussBeamO, ParabolicGaussBeamE, ParabolicGaussBeamO
 
 """
     LaguerreGaussBeam(x, y, w0, phi, l, p)
@@ -148,5 +148,35 @@ function MathieuGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, m:
     MGO = exp(-rr2) * sf_mathieu_Ms(1,m,q,ee) * sf_mathieu_se(m,q,nn) * exp(im*phi)
     return MGO
 end
+
+"""
+    ParabolicGaussBeamE(x, y, w0, phi, a, kt, gamma1)
+
+Parabolic-Gaussian beam (even)"""
+function ParabolicGaussBeamE(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, kt::Float64, g1)
+    PGE::ComplexF64 = 0.0 + im*0.0
+    rr2 = (x^2 + y^2)/(w0^2)
+    uu = (2*(x + im*y)/w0)^(1/2)
+    nn = real(uu)
+    ee = abs(imag(uu))
+    PGE = g1 * exp(-rr2) * ParabolicEven(sqrt(2*kt)*ee,a) * ParabolicEven(sqrt(2*kt)*nn,-a)
+    return PGE
+end
+
+
+"""
+    ParabolicGaussBeamO(x, y, w0, phi, a, kt, gamma3)
+
+Parabolic-Gaussian beam (odd)"""
+function ParabolicGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, kt::Float64, g3)
+    PGO::ComplexF64 = 0.0 + im*0.0
+    rr2 = (x^2 + y^2)/(w0^2)
+    uu = (2*(x + im*y)/w0)^(1/2)
+    nn = real(uu)
+    ee = abs(imag(uu))
+    PGO = g3 * exp(-rr2) * ParabolicOdd(sqrt(2*kt)*ee,a) * ParabolicOdd(sqrt(2*kt)*nn,-a)
+    return PGO
+end
+
 
 end # module

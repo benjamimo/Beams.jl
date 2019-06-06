@@ -1,4 +1,7 @@
 using LinearAlgebra     # linear algebra library
+using PyCall
+#mpm = pyimport("mpmath")  # hypergeometric confluent function!
+
 
 """
     LaguerrePoly(n,k,x)
@@ -214,4 +217,22 @@ else
 end
 
 return IP
+end
+
+
+function ParabolicEven(x,a)
+    mpm = pyimport("mpmath")  # hypergeometric confluent function!
+    pe = mpm.hyp1f1(0.25-im*0.5*a, 0.5, im*0.5*x^2)
+    pej = convert(Complex, pe)
+    PE = exp(-0.25*im*x^2) * pej
+    return PE
+end
+
+
+function ParabolicOdd(x,a)
+    mpm = pyimport("mpmath")  # hypergeometric confluent function!
+    po = mpm.hyp1f1(0.75-im*0.5*a, 1.5, im*0.5*x^2)
+    poj = convert(Complex, po)
+    PO = x*exp(-0.25*im*x^2) * poj
+    return PO
 end

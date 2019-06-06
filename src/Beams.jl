@@ -158,7 +158,7 @@ function ParabolicGaussBeamE(x::Float64, y::Float64, w0::Float64, phi::Float64, 
     rr2 = (x^2 + y^2)/(w0^2)
     uu = (2*(x + im*y)/w0)^(1/2)
     nn = real(uu)
-    ee = abs(imag(uu))
+    ee = (imag(uu))
     PGE = g1 * exp(-rr2) * ParabolicEven(sqrt(2*kt)*ee,a) * ParabolicEven(sqrt(2*kt)*nn,-a)
     return PGE
 end
@@ -173,7 +173,7 @@ function ParabolicGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, 
     rr2 = (x^2 + y^2)/(w0^2)
     uu = (2*(x + im*y)/w0)^(1/2)
     nn = real(uu)
-    ee = abs(imag(uu))
+    ee = (imag(uu))
     PGO = g3 * exp(-rr2) * ParabolicOdd(sqrt(2*kt)*ee,a) * ParabolicOdd(sqrt(2*kt)*nn,-a)
     return PGO
 end

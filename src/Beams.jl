@@ -4,7 +4,7 @@ include("SpecFunctions.jl")    # Some Special functions
 using SpecialFunctions   # needed for Bessel!
 using GSL  # Mathieu functions!!
 
-export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam, MathieuGaussBeamE, MathieuGaussBeamO, ParabolicGaussBeamE, ParabolicGaussBeamO
+export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam, MathieuGaussBeamE, MathieuGaussBeamO, ParabolicGaussBeamE, ParabolicGaussBeamO, FAiryBeam
 
 """
     LaguerreGaussBeam(x, y, w0, phi, l, p)
@@ -176,6 +176,17 @@ function ParabolicGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, 
     ee = (imag(uu))
     PGO = g3 * exp(-rr2) * ParabolicOdd(sqrt(2*kt)*ee,a) * ParabolicOdd(sqrt(2*kt)*nn,-a)
     return PGO
+end
+
+"""
+    FAiryBeam(kx, ky, x0, a)
+
+Fourier Spectrum of Airy beam"""
+function FAiryBeam(kx::Float64, ky::Float64, x0::Float64, a::Float64)
+    FAB::ComplexF64 = 0.0 + im*0.0
+    kk2 = (kx^2 + ky^2)
+    FAB = exp(im*(x0^3)*((kx^3)/3 + (ky^3)/3)) * exp(-a*(x0^2)*kk2)
+    return FAB
 end
 
 

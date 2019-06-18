@@ -4,7 +4,9 @@ include("SpecFunctions.jl")    # Some Special functions
 using SpecialFunctions   # needed for Bessel!
 using GSL  # Mathieu functions!!
 
-export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO, BesselGaussBeam, CosineGaussBeam, SineGaussBeam, MathieuGaussBeamE, MathieuGaussBeamO, ParabolicGaussBeamE, ParabolicGaussBeamO, FAiryBeam
+export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO,
+       BesselBeam, CosineBeam, SineBeam, MathieuBeamE, MathieuBeamO, ParabolicBeamE,
+       ParabolicBeamO, FAiryBeam, GaussianBeam, HzGprop
 
 """
     LaguerreGaussBeam(x, y, w0, phi, l, p)
@@ -25,7 +27,6 @@ function LaguerreGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, l:
 
     return LG::ComplexF64
 end
-
 
 """
     SmallCore(x, y, w0, wV, phi, l)
@@ -83,98 +84,90 @@ function IGBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, p::Int64, m:
 end
 
 """
-    BesselGaussBeam(x, y, w0, phi, a, l)
+    BesselGaussBeam(x, y, muz, phi, kt, l)
 
 Bessel-Gaussian beam """
-function BesselGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, l::Int64)
+function BesselBeam(x::Float64, y::Float64, muz::T, phi::Float64, kt::Float64, l::Int64) where T <: Union{Float64, ComplexF64}
     BG::ComplexF64 = 0.0 + im*0.0
-    rr2 = (x^2 + y^2)/(w0^2)
-    rr = sqrt(rr2)
-    BG = exp(-rr2) * besselj(l, a*rr) * exp(im*(l*atan(y, x) + phi))
+    rr = sqrt(x^2 + y^2)
+    BG = besselj(l, kt*rr/muz) * exp(im*(l*atan(y, x) + phi))
     return BG
 end
 
 """
-    CosineGaussBeam(x, y, w0, phi, a, l)
+    CosineGaussBeam(x, y, phi, kt, th)
 
 Cosine-Gaussian beam """
-function CosineGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, th::Float64)
+function CosineBeam(x::Float64, y::Float64, muz::T, phi::Float64, kt::Float64, th::Float64) where T <: Union{Float64, ComplexF64}
     CG::ComplexF64 = 0.0 + im*0.0
-    rr2 = (x^2 + y^2)/(w0^2)
-    CG = exp(-rr2) * cos(a*(x*cos(th) + y*sin(th))/w0)
+    CG = cos(kt*(x*cos(th) + y*sin(th))/muz)
     return CG
 end
 
 """
-    SineGaussBeam(x, y, w0, phi, a, l)
+    SineGaussBeam(x, y, muz, phi, kt, th)
 
 Sine-Gaussian beam """
-function SineGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, th::Float64)
+function SineBeam(x::Float64, y::Float64, muz::T, phi::Float64, kt::Float64, th::Float64) where T <: Union{Float64, ComplexF64}
     SG::ComplexF64 = 0.0 + im*0.0
-    rr2 = (x^2 + y^2)/(w0^2)
-    SG = exp(-rr2) * sin(a*(x*cos(th) + y*sin(th))/w0)
+    SG = sin(kt*(x*cos(th) + y*sin(th))/muz)
     return SG
 end
 
 """
-    MathieuGaussBeamE(x, y, w0, phi, m, q, a)
+    MathieuGaussBeamE(x, y, phi, m, q, kt)
 
 Mathieu-Gaussian beam (even)"""
-function MathieuGaussBeamE(x::Float64, y::Float64, w0::Float64, phi::Float64, m::Int64, q::Float64, a::Float64)
+function MathieuBeamE(x::Float64, y::Float64, phi::Float64, m::Int64, q::Float64, kt::Float64) where T <: Union{Float64, ComplexF64}
     MGE::ComplexF64 = 0.0 + im*0.0
-    f0 = sqrt(q/2) * w0 / a
-    rr2 = (x^2 + y^2)/(w0^2)
+    f0 = 2*sqrt(q)/kt
     uu = acosh((x+im*y)/f0)
     ee = real(uu)
     nn = imag(uu)
     nn = nn + (nn<0)*2*pi
-    MGE = exp(-rr2) * sf_mathieu_Mc(1,m,q,ee) * sf_mathieu_ce(m,q,nn) * exp(im*phi)
-#     MGE = exp(-rr2) * JeMathieu(m,q,Coef,ee) * ceMathieu(m,q,Coef,ee) * exp(im*phi) # mi funcion no jalo :(
+    MGE = sf_mathieu_Mc(1,m,q,ee) * sf_mathieu_ce(m,q,nn) * exp(im*phi)
     return MGE
 end
 
 """
-    MathieuGaussBeamO(x, y, w0, phi, m, q, a)
+    MathieuGaussBeamO(x, y, phi, m, q, kt)
 
 Mathieu-Gaussian beam (odd)"""
-function MathieuGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, m::Int64, q::Float64, a::Float64)
+function MathieuBeamO(x::Float64, y::Float64, phi::Float64, m::Int64, q::Float64, kt::Float64) where T <: Union{Float64, ComplexF64}
     MGO::ComplexF64 = 0.0 + im*0.0
-    f0 = sqrt(q/2) * w0 / a
-    rr2 = (x^2 + y^2)/(w0^2)
+    f0 = 2*sqrt(q)/kt
     uu = acosh((x+im*y)/f0)
     ee = real(uu)
     nn = imag(uu)
     nn = nn + (nn<0)*2*pi
-    MGO = exp(-rr2) * sf_mathieu_Ms(1,m,q,ee) * sf_mathieu_se(m,q,nn) * exp(im*phi)
+    MGO = sf_mathieu_Ms(1,m,q,ee) * sf_mathieu_se(m,q,nn) * exp(im*phi)
     return MGO
 end
 
 """
-    ParabolicGaussBeamE(x, y, w0, phi, a, kt, gamma1)
+    ParabolicGaussBeamE(x, y, phi, a, kt, gamma1)
 
 Parabolic-Gaussian beam (even)"""
-function ParabolicGaussBeamE(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, kt::Float64, g1)
+function ParabolicBeamE(x::Float64, y::Float64, muz::T, phi::Float64, a::Float64, kt::Float64, g1::Float64) where T <: Union{Float64, ComplexF64}
     PGE::ComplexF64 = 0.0 + im*0.0
-    rr2 = (x^2 + y^2)/(w0^2)
-    uu = (2*(x + im*y)/w0)^(1/2)
+    uu = (2*(x + im*y))^(1/2)
     nn = real(uu)
-    ee = (imag(uu))
-    PGE = g1 * exp(-rr2) * ParabolicEven(sqrt(2*kt)*ee,a) * ParabolicEven(sqrt(2*kt)*nn,-a)
+    ee = imag(uu)
+    PGE = g1 * ParabolicEven(sqrt(2*kt/muz)*ee,a) * ParabolicEven(sqrt(2*kt/muz)*nn,-a)
     return PGE
 end
 
 
 """
-    ParabolicGaussBeamO(x, y, w0, phi, a, kt, gamma3)
+    ParabolicGaussBeamO(x, y, phi, a, kt, gamma3)
 
 Parabolic-Gaussian beam (odd)"""
-function ParabolicGaussBeamO(x::Float64, y::Float64, w0::Float64, phi::Float64, a::Float64, kt::Float64, g3)
+function ParabolicBeamO(x::Float64, y::Float64, muz::T, phi::Float64, a::Float64, kt::Float64, g3::Float64) where T <: Union{Float64, ComplexF64}
     PGO::ComplexF64 = 0.0 + im*0.0
-    rr2 = (x^2 + y^2)/(w0^2)
-    uu = (2*(x + im*y)/w0)^(1/2)
+    uu = (2*(x + im*y))^(1/2)
     nn = real(uu)
-    ee = (imag(uu))
-    PGO = g3 * exp(-rr2) * ParabolicOdd(sqrt(2*kt)*ee,a) * ParabolicOdd(sqrt(2*kt)*nn,-a)
+    ee = imag(uu)
+    PGO = g3 * ParabolicOdd(sqrt(2*kt/muz)*ee,a) * ParabolicOdd(sqrt(2*kt/muz)*nn,-a)
     return PGO
 end
 
@@ -189,5 +182,29 @@ function FAiryBeam(kx::Float64, ky::Float64, x0::Float64, a::Float64)
     return FAB
 end
 
+"""
+    GaussianBeam(x, y, z, w0, k)
+
+Fundamental Gaussian beam """
+function GaussianBeam(x::Float64, y::Float64, z, w0, k)
+    GB::ComplexF64 = 0.0 + im*0.0
+    zr = k*(w0^2)/2
+    muz = 1 + im*z/zr
+    rr2m = (x^2 + y^2)/(muz*w0^2)
+    GB = ((exp(im*k*z))/muz) * exp(-rr2m)
+    return GB
+end
+
+"""
+    HzGprop(z, w0, k, kt)
+
+Propagation term of HzG beams """
+function HzGprop(z::Float64, w0::Float64, k::Float64, kt::Float64)
+    HGP::ComplexF64 = 0.0 + im*0.0
+    zr = k*(w0^2)/2
+    muz = 1 + im*z/zr
+    HGP = exp(-im*(kt^2)*z/(2*k*muz))
+    return HGP
+end
 
 end # module

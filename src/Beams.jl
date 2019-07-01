@@ -212,12 +212,13 @@ end
     fBesselBeam(x, y, phi, w0, kt, l)
 
 Spectrum of Bessel-Gaussian beam """
-function fBesselBeam(u::Float64, v::Float64, phi::Float64, w0::Float64, kt::Float64, l::Int64) where T <: Union{Float64, ComplexF64}
+function fBesselBeam(u::Float64, v::Float64, phi::Float64, w0::Float64, kt::Float64, l::Int64)
     fBG::ComplexF64 = 0.0 + im*0.0
     rho2 = u^2 + v^2
     rho = sqrt(rho2)
     gam = 0.5*kt*w0
-    fBG = ((-1)^l) * exp(-(w0^2)*rho2/4) * besseli(l, 2*(gam^2)*rho/kt) * exp(im*(l*atan(v, u) + phi))
+    DD = (0.5*w0^2) * exp(-0.25*(kt^2)*(w0^2))
+    fBG = ((-1)^l) * DD * exp(-(w0^2)*rho2/4) * besseli(l, 2*(gam^2)*rho/kt) * exp(im*(l*atan(v, u) + phi))
     return fBG
 end
 
@@ -227,7 +228,8 @@ end
 Spectrum of Parabolic-Gaussian beam Even """
 function fParabolicBeamE(u::Float64, v::Float64, phi::Float64, w0::Float64, a::Float64, kt::Float64, g1::Float64)
     fPGE::ComplexF64 = 0.0 + im*0.0
-    fPGE = (1/(pi*sqrt(2))) * 1.0 *
+    DD = (0.5*w0^2) * exp(-0.25*(kt^2)*(w0^2))
+    fPGE = (1/(pi*sqrt(2))) * DD *
              GaussianBeam(u, v, 0.0, 2/w0, 1.0) *
              ParabolicBeamE(u, v, 2*im/(w0^2), 0.0, a, kt, g1);
     return fPGE
@@ -239,7 +241,8 @@ end
 Spectrum of Parabolic-Gaussian beam Odd """
 function fParabolicBeamO(u::Float64, v::Float64, phi::Float64, w0::Float64, a::Float64, kt::Float64, g3::Float64)
     fPGO::ComplexF64 = 0.0 + im*0.0
-    fPGO = (2/(pi*sqrt(2))) * 1.0 *
+    DD = (0.5*w0^2) * exp(-0.25*(kt^2)*(w0^2))
+    fPGO = (2/(pi*sqrt(2))) * DD *
              GaussianBeam(u, v, 0.0, 2/w0, 1.0) *
              ParabolicBeamO(u, v, 2*im/(w0^2), 0.0, a, kt, g3);
     return fPGO

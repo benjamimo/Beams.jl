@@ -7,7 +7,7 @@ using GSL  # Mathieu functions!!
 export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO,
        BesselBeam, CosineBeam, SineBeam, MathieuBeamE, MathieuBeamO, ParabolicBeamE,
        ParabolicBeamO, FAiryBeam, GaussianBeam, HzGprop, fBesselBeam, fParabolicBeamE,
-       fParabolicBeamO
+       fParabolicBeamO, fMathieuBeamE, fMathieuBeamO, GaussianRing
 
 """
     LaguerreGaussBeam(x, y, w0, phi, l, p)
@@ -214,11 +214,10 @@ end
 Spectrum of Bessel-Gaussian beam """
 function fBesselBeam(u::Float64, v::Float64, phi::Float64, w0::Float64, kt::Float64, l::Int64)
     fBG::ComplexF64 = 0.0 + im*0.0
-    rho2 = u^2 + v^2
-    rho = sqrt(rho2)
-    gam = 0.5*kt*w0
-    DD = (0.5*w0^2) * exp(-0.25*(kt^2)*(w0^2))
-    fBG = ((-1)^l) * DD * exp(-(w0^2)*rho2/4) * besseli(l, 2*(gam^2)*rho/kt) * exp(im*(l*atan(v, u) + phi))
+    fBG = GaussianRing(u, v, w0, kt) * exp(im*(l*atan(v, u) + phi))
+    # gam = 0.5*kt*w0
+    # DD = (0.5*w0^2) * exp(-0.25*(kt^2)*(w0^2))
+    # fBG = ((-1)^l) * DD * exp(-(w0^2)*rho2/4) * besseli(l, 2*(gam^2)*rho/kt) * exp(im*(l*atan(v, u) + phi))
     return fBG
 end
 
@@ -248,4 +247,35 @@ function fParabolicBeamO(u::Float64, v::Float64, phi::Float64, w0::Float64, a::F
     return fPGO
 end
 
+"""
+    MathieuBeamE(x, y, phi, m, q, kt)
+
+Angular dependence of Mathieu-Gaussian beam (even)"""
+function fMathieuBeamE(x::Float64, y::Float64, phi::Float64, m::Int64, q::Float64, kt::Float64)
+    fMGE::ComplexF64 = 0.0 + im*0.0
+    th = atan(y,x)
+    fMGE = sf_mathieu_ce(m,q,th) * exp(im*phi)
+    return fMGE
+end
+
+"""
+    fMathieuBeamO(x, y, phi, m, q, kt)
+
+Angular dependence of Mathieu-Gaussian beam (odd)"""
+function fMathieuBeamO(x::Float64, y::Float64, phi::Float64, m::Int64, q::Float64, kt::Float64)
+    fMGO::ComplexF64 = 0.0 + im*0.0
+    th = atan(y,x)
+    fMGO = sf_mathieu_se(m,q,th) * exp(im*phi)
+    return fMGO
+end
+
+"""
+    GaussianRing(x, y, phi, wR, kt)
+
+Ring with Gaussian apodization"""
+function GaussianRing(x::Float64, y::Float64, wR::Float64, kt::Float64)
+    rr = sqrt(x^2 + y^2)
+    fR = exp(-0.25*(wR^2)*((rr-kt)^2))
+    return fR
+end
 end # module

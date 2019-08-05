@@ -10,20 +10,27 @@ export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO,
        fParabolicBeamO, fMathieuBeamE, fMathieuBeamO, GaussianRing
 
 """
-    LaguerreGaussBeam(x, y, w0, phi, l, p)
+    LaguerreGaussBeam(x, y, z,w0, phi, lambda, l, p)
 
 Laguerre-Gaussian beam """
-#function LaguerreGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, l::Int64, p::Int64)
-function LaguerreGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, l::Int64, p::Int64)
+function LaguerreGaussBeam(x::Float64, y::Float64, z::Float64, w0::Float64, phi::Float64, lambda::Float64, l::Int64, p::Int64)
     LG::ComplexF64=0.0 + im*0.0
-    rr2=(x^2 + y^2)/(w0^2)
+
+    zr = pi*(w0^2)/lambda
+    wz2 = (w0^2) * (1 + (z/zr)^2)
+    wz = sqrt(wz2)
+    rr2=(x^2 + y^2)/(wz2)
+    C = sqrt((2^(abs(l)+1)) * factorial(p) / (pi*factorial(p + abs(l))))
+    k = 2*pi/lambda
 
     if p==0
-        LG=(sqrt(rr2)^abs(l)) * exp(-rr2) * exp(im*(l*atan(y,x)+phi))
-        # println(p)
+        LG = (C/sqrt(wz)) * ((sqrt(2*rr2))^abs(l)) * exp(-rr2) *
+            1.0 * exp(-im*rr2*z/zr) * exp(im*(l*atan(y,x)+phi)) *
+            exp(-im*(2*p+abs(l)+1) * atan(z,zr))
     else
-        LG=(sqrt(rr2)^abs(l)) * exp(-rr2) * LaguerrePoly.(p, abs(l), 2*rr2) * exp(im*(l*atan(y,x)+phi))   # Im not sure about adding the dot in LaguerrePoly...
-        # println(p)
+        LG = (C/sqrt(wz)) * ((sqrt(2*rr2))^abs(l)) * exp(-rr2) *
+            LaguerrePoly.(p, abs(l), 2*rr2) * exp(-im*rr2*z/zr) * exp(im*(l*atan(y,x)+phi)) *
+            exp(-im*(2*p+abs(l)+1) * atan(z,zr))
     end
 
     return LG::ComplexF64
@@ -227,6 +234,8 @@ end
 Spectrum of Parabolic-Gaussian beam Even """
 function fParabolicBeamE(u::Float64, v::Float64, phi::Float64, w0::Float64, a::Float64, kt::Float64, g1::Float64)
     fPGE::ComplexF64 = 0.0 + im*0.0
+    # th = atan(v,u)
+    # fPGE = (1/(2*sqrt(pi*abs(sin(th))))) * exp(im*a*log(abs(tan(th/2))))
     DD = (0.5*w0^2) * exp(-0.25*(kt^2)*(w0^2))
     fPGE = (1/(pi*sqrt(2))) * DD *
              GaussianBeam(u, v, 0.0, 2/w0, 1.0) *

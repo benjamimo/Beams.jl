@@ -13,24 +13,27 @@ export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO,
     LaguerreGaussBeam(x, y, z,w0, phi, lambda, l, p)
 
 Laguerre-Gaussian beam """
-function LaguerreGaussBeam(x::Float64, y::Float64, z::Float64, w0::Float64, phi::Float64, lambda::Float64, l::Int64, p::Int64)
+function LaguerreGaussBeam(x::Float64, y::Float64, z::Float64, w0::Float64, phi::Float64, lambda::Float64, l, p)
     LG::ComplexF64=0.0 + im*0.0
 
     zr = pi*(w0^2)/lambda
     wz2 = (w0^2) * (1 + (z/zr)^2)
     wz = sqrt(wz2)
     rr2=(x^2 + y^2)/(wz2)
-    C = sqrt((2^(abs(l)+1)) * factorial(p) / (pi*factorial(p + abs(l))))
+    C = sqrt(2 * factorial(p) / (pi*factorial(p + abs(l))))
     k = 2*pi/lambda
 
     if p==0
-        LG = (C/sqrt(wz)) * ((sqrt(2*rr2))^abs(l)) * exp(-rr2) *
+        LG = (C/wz) * ((sqrt(2*rr2))^abs(l)) * exp(-rr2) *
             1.0 * exp(-im*rr2*z/zr) * exp(im*(l*atan(y,x)+phi)) *
             exp(-im*(2*p+abs(l)+1) * atan(z,zr))
     else
-        LG = (C/sqrt(wz)) * ((sqrt(2*rr2))^abs(l)) * exp(-rr2) *
-            LaguerrePoly.(p, abs(l), 2*rr2) * exp(-im*rr2*z/zr) * exp(im*(l*atan(y,x)+phi)) *
+        LG = (C/wz) * ((sqrt(2*rr2))^abs(l)) * exp(-rr2) *
+            sf_laguerre_n.(p, abs(l), 2*rr2) * exp(-im*rr2*z/zr) * exp(im*(l*atan(y,x)+phi)) *
             exp(-im*(2*p+abs(l)+1) * atan(z,zr))
+        # LG = (C/sqrt(wz)) * ((sqrt(2*rr2))^abs(l)) * exp(-rr2) *
+        #     LaguerrePoly.(p, abs(l), 2*rr2) * exp(-im*rr2*z/zr) * exp(im*(l*atan(y,x)+phi)) *
+        #     exp(-im*(2*p+abs(l)+1) * atan(z,zr))
     end
 
     return LG::ComplexF64

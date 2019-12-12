@@ -1,7 +1,5 @@
 using LinearAlgebra     # linear algebra library
 using PyCall
-#mpm = pyimport("mpmath")  # hypergeometric confluent function!
-
 
 """
     LaguerrePoly(n,k,x)

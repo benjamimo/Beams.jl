@@ -50,7 +50,7 @@ else
     NS = sign(coef[1])
     coef = coef/N1/NS
 end
-return coef
+return A
 end
 
 

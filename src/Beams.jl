@@ -3,11 +3,12 @@ module Beams
 include("SpecFunctions.jl")    # Some Special functions
 using SpecialFunctions   # needed for Bessel!
 using GSL  # Mathieu functions!!
+using FFTW
 
 export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO,
        BesselBeam, CosineBeam, SineBeam, MathieuBeamE, MathieuBeamO, ParabolicBeamE,
        ParabolicBeamO, FAiryBeam, GaussianBeam, HzGprop, fBesselBeam, fParabolicBeamE,
-       fParabolicBeamO, fMathieuBeamE, fMathieuBeamO, GaussianRing
+       fParabolicBeamO, fMathieuBeamE, fMathieuBeamO, GaussianRing, BeamPropagation
 
 """
     LaguerreGaussBeam(x, y, z,w0, phi, lambda, l, p)
@@ -289,5 +290,34 @@ function GaussianRing(x::Float64, y::Float64, wR::Float64, kt::Float64)
     rr = sqrt(x^2 + y^2)
     fR = exp(-0.25*(wR^2)*((rr-kt)^2))
     return fR
+end
+
+"""
+    BeamPropagation(U, z, lamb, xmax)
+
+Numerical propagation"""
+function BeamPropagation(U, z, lamb, xmax)
+
+    M,N = size(U)
+    dx = 2xmax/M
+    k = 2pi/lamb
+    fx = collect(-1/(2dx):1/(2xmax):1/(2dx)-1/(2xmax))
+    fy = collect(-1/(2dx):1/(2xmax):1/(2dx)-1/(2xmax))
+
+    # Generates matrices Matlab-style
+    mfx, nfy = length(fx), length(fy)
+    Fxs = reshape(fx, mfx, 1)
+    Fys = reshape(fy, 1, nfy)
+
+    # H function
+    H = exp.(-im*pi*lamb*z*(Fxs.^2 .+ Fys.^2))
+    H = fftshift(H)
+
+    # Propagation
+    U1 = fft(fftshift(U))
+    U2 = H .* U1
+    Uz = ifftshift(ifft(U2))
+
+    return Uz
 end
 end # module

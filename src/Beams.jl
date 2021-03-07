@@ -11,7 +11,7 @@ export LaguerreGaussBeam, SmallCoreBeam, HermiteGaussBeam, IGBeamE, IGBeamO,
        fParabolicBeamO, fMathieuBeamE, fMathieuBeamO, GaussianRing, BeamPropagation
 
 """
-    LaguerreGaussBeam(x, y, z,w0, phi, lambda, l, p)
+    LaguerreGaussBeam(x, y, z, w0, phi, lambda, l, p)
 
 Laguerre-Gaussian beam """
 function LaguerreGaussBeam(x::Float64, y::Float64, z::Float64, w0::Float64, phi::Float64, lambda::Float64, l, p)
@@ -52,13 +52,21 @@ function SmallCoreBeam(x::Float64, y::Float64, w0::Float64, wV::Float64, phi::Fl
 end
 
 """
-    HermiteGaussBeam(x, y, w0, phi, l, p)
+    HermiteGaussBeam(x, y, z, w0, phi, lambda, m, n)
 
 Hermite-Gaussian beam """
-function HermiteGaussBeam(x::Float64, y::Float64, w0::Float64, phi::Float64, m::Int64, n::Int64)
+function HermiteGaussBeam(x::Float64, y::Float64, z::Float64, w0::Float64, phi::Float64, lambda::Float64, m::Int64, n::Int64)
     HG::ComplexF64=0.0 + im*0.0
-    rr2=(x^2 + y^2)/(w0^2)
-    HG= HermitePoly(m,sqrt(2)*x/w0) * HermitePoly(n,sqrt(2)*y/w0) * exp(-rr2) * exp(im*(phi))   # Im not sure about adding the dot in LaguerrePoly...
+
+    zr = pi*(w0^2)/lambda
+    wz2 = (w0^2) * (1 + (z/zr)^2)
+    wz = sqrt(wz2)
+    rr2=(x^2 + y^2)/(wz2)
+    C = sqrt(2/pi) * (2.0)^(-(m+n)/2) * (1/sqrt(factorial(n)*factorial(m)*(w0^2)))
+    k = 2*pi/lambda
+
+    HG= C * HermitePoly(m,sqrt(2)*x/wz) * HermitePoly(n,sqrt(2)*y/wz) * exp(-im*rr2*z/zr) *
+        exp(-rr2) * exp(-im*(m+n+1)*atan(z,zr)) * exp(im*(phi))   # Im not sure about adding the dot in LaguerrePoly...
     return HG::Complex{Float64}
 end
 
@@ -261,9 +269,9 @@ function fParabolicBeamO(u::Float64, v::Float64, phi::Float64, w0::Float64, a::F
 end
 
 """
-    MathieuBeamE(x, y, phi, m, q, kt)
+    fMathieuBeamE(x, y, phi, m, q, kt)
 
-Angular dependence of Mathieu-Gaussian beam (even)"""
+Angular dependence of the Spectrum of Mathieu-Gaussian beam (even)"""
 function fMathieuBeamE(x::Float64, y::Float64, phi::Float64, m::Int64, q::Float64, kt::Float64)
     fMGE::ComplexF64 = 0.0 + im*0.0
     th = atan(y,x)
@@ -274,7 +282,7 @@ end
 """
     fMathieuBeamO(x, y, phi, m, q, kt)
 
-Angular dependence of Mathieu-Gaussian beam (odd)"""
+Angular dependence of the Spectrum of Mathieu-Gaussian beam (odd)"""
 function fMathieuBeamO(x::Float64, y::Float64, phi::Float64, m::Int64, q::Float64, kt::Float64)
     fMGO::ComplexF64 = 0.0 + im*0.0
     th = atan(y,x)
